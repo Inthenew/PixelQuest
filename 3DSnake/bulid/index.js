@@ -777,6 +777,8 @@ function game() {
                                     zombies[i].health -= 2;
                                     if (zombies[i].health <= 0) {
                                         zombies[i].die();
+                                        gold++;
+                                        $(".gold").text(String(gold))
                                     }
                                     return true;
                                 }
@@ -1005,6 +1007,8 @@ function game() {
                                     zombies[i].health -= 3;
                                     if (zombies[i].health <= 0) {
                                         zombies[i].die();
+                                        gold++;
+                                        $(".gold").text(String(gold))
                                     }
                                     return true;
                                 }
@@ -1141,6 +1145,8 @@ function game() {
                                         zombies[i].health -= 0.5;
                                         if (zombies[i].health <= 0) {
                                             zombies[i].die();
+                                            gold++;
+                                            $(".gold").text(String(gold))
                                         }
                                     }
                                 }
@@ -1261,7 +1267,7 @@ function game() {
             var wall4 = new WallTurned(window.innerWidth - 100, 0);
             var redstaff = new RedStaff(160, 100);
             var redstaffB = new RedStaffBULLET(160, 100);
-            var gold = 12;
+            var gold = 0;
             document.getElementById("price").innerHTML = "Price: " + String(redstaff.price);
             onmouseoverRedStaff = () => {
                 if (not(redstaffBEEN)) {
@@ -1511,7 +1517,7 @@ function game() {
             var sword = new Sword(10, 10);
             sword.draw();
             equip(sword);
-            var zombies = [new Zombie(100, 200, 0), new Zombie(500, 500, 1), new Zombie(700, 700, 2), new Zombie(20, 900, 3), new Zombie(1000, 300, 4), new Zombie(400, 100, 5), new Zombie(50, 300, 6)];
+            var zombies = [new Zombie(100, 200, 0), new Zombie(500, 500, 1), new Zombie(700, 700, 2), new Zombie(20, 900, 3), new Zombie(1000, 300, 4)];
             for (var i = 0; i < zombies.length; i++) {
                 zombies[i].draw();
             }
