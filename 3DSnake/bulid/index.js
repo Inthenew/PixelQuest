@@ -56,6 +56,12 @@ function game() {
                         width: 50,
                         height: 50
                     };
+                    this.health = 10;
+                    this.alive = true;
+                }
+                die() {
+                    document.getElementById('img').remove();
+                    this.alive = false;
                 }
                 draw() {
                     var html = '<img id="img" src="' + dot + '/0.gif">';
@@ -69,194 +75,202 @@ function game() {
                     $("body").append(this.drawing);
                 }
                 KeyDown(e, house, width, height) {
-                    if (!inPrompt) {
-                        switch (e.keyCode) {
-                            case 87: /*w*/
-                                this.y -= 10;
-                                this.face = "up";
-                                this.updateImage('<img id="img" src="' + dot + '/0-1.gif">');
-                                if (this.checkCollision(house, width, height)) {
-                                    this.y += 10;
-                                }
-                                break;
-                            case 83: /*s*/
-                                this.y += 10;
-                                this.face = "down";
-                                this.updateImage('<img id="img" src="' + dot + '/0-3.gif">');
-                                if (this.checkCollision(house, width, height)) {
+                    if (this.alive) {
+                        if (!inPrompt) {
+                            switch (e.keyCode) {
+                                case 87: /*w*/
                                     this.y -= 10;
-                                }
-                                break;
-                            case 68: /*d*/
-                                this.x += 10;
-                                this.face = "right";
-                                this.updateImage('<img id="img" src="' + dot + '/0-2.gif">');
-                                if (this.checkCollision(house, width, height)) {
-                                    this.x -= 10;
-                                }
-                                break;
-                            case 65: /*a*/
-                                this.x -= 10;
-                                this.face = "left";
-                                this.updateImage('<img id="img" src="' + dot + '/0.gif">');
-                                if (this.checkCollision(house, width, height)) {
+                                    this.face = "up";
+                                    this.updateImage('<img id="img" src="' + dot + '/0-1.gif">');
+                                    if (this.checkCollision(house, width, height)) {
+                                        this.y += 10;
+                                    }
+                                    break;
+                                case 83: /*s*/
+                                    this.y += 10;
+                                    this.face = "down";
+                                    this.updateImage('<img id="img" src="' + dot + '/0-3.gif">');
+                                    if (this.checkCollision(house, width, height)) {
+                                        this.y -= 10;
+                                    }
+                                    break;
+                                case 68: /*d*/
                                     this.x += 10;
-                                }
-                                break;
+                                    this.face = "right";
+                                    this.updateImage('<img id="img" src="' + dot + '/0-2.gif">');
+                                    if (this.checkCollision(house, width, height)) {
+                                        this.x -= 10;
+                                    }
+                                    break;
+                                case 65: /*a*/
+                                    this.x -= 10;
+                                    this.face = "left";
+                                    this.updateImage('<img id="img" src="' + dot + '/0.gif">');
+                                    if (this.checkCollision(house, width, height)) {
+                                        this.x += 10;
+                                    }
+                                    break;
+                            }
                         }
                     }
                 }
                 Animate() {
-                    this.drawing.css({
-                        position: "absolute",
-                        left: this.x,
-                        top: this.y
-                    });
+                    if (this.alive) {
+                        this.drawing.css({
+                            position: "absolute",
+                            left: this.x,
+                            top: this.y
+                        });
+                    }
                 }
                 updateImage(to) {
-                    document.getElementById('img').remove();
-                    var html = to;
-                    this.drawing = $(html);
-                    this.drawing.css({
-                        position: "absolute",
-                        left: this.x,
-                        top: this.y
-                    });
-                    $("body").append(this.drawing);
+                    if (this.alive) {
+                        document.getElementById('img').remove();
+                        var html = to;
+                        this.drawing = $(html);
+                        this.drawing.css({
+                            position: "absolute",
+                            left: this.x,
+                            top: this.y
+                        });
+                        $("body").append(this.drawing);
+                    }
                 }
                 checkCollision(house, width, height) {
-                    if (mapOn === "start") {
-                        var ToTheRight = false;
-                        var ToTheLeft = false;
-                        var difference;
-                        if (this.x - house.x > 0) {
-                            /*To the right*/
-                            ToTheRight = true;
-                            difference = this.x - house.x;
-                        } else {
-                            /*To the left*/
-                            ToTheLeft = true;
-                            difference = house.x - this.x;
-                        }
-                        var AABB = {
-                            collide: function (player, el2, offset) {
-                                var rect1 = player.getBoundingClientRect();
-                                var rect2 = el2.getBoundingClientRect();
-
-                                return !(
-                                    rect1.top > rect2.bottom - offset ||
-                                    rect1.right < rect2.left + offset ||
-                                    rect1.bottom < rect2.top + offset ||
-                                    rect1.left > rect2.right - offset
-                                );
-                            }
-                        };
-                        if (AABB.collide(document.getElementById("img"), document.getElementById("Sign"), 20)) {
-                            return true;
-                        }
-                        var diffY = Math.abs(this.y - house.y);
-                        if (ToTheRight) {
-                            if (difference <= 200 && difference > 160 && diffY < height - 100) {
-                                /*Your At The Door*/
-                                dude.draw();
-                                inPrompt = true;
-                                show_Prompt();
-                            }
-                            if (difference < 300 && diffY < height - 100) {
-                                return true;
+                    if (this.alive) {
+                        if (mapOn === "start") {
+                            var ToTheRight = false;
+                            var ToTheLeft = false;
+                            var difference;
+                            if (this.x - house.x > 0) {
+                                /*To the right*/
+                                ToTheRight = true;
+                                difference = this.x - house.x;
                             } else {
-                                if (this.x > screen.availWidth - 50) {
-                                    mapOn = "quest";
-                                    map.l.hide();
-                                    sign.drawing.hide();
-                                    house.drawing.hide();
-                                    map1.drawing.show();
-                                    $(".Zombies").show();
-                                    for (var i = 0; i < zombies.length; i++) {
-                                        zombies[i].needToBeHidden = false;
+                                /*To the left*/
+                                ToTheLeft = true;
+                                difference = house.x - this.x;
+                            }
+                            var AABB = {
+                                collide: function (player, el2, offset) {
+                                    var rect1 = player.getBoundingClientRect();
+                                    var rect2 = el2.getBoundingClientRect();
+
+                                    return !(
+                                        rect1.top > rect2.bottom - offset ||
+                                        rect1.right < rect2.left + offset ||
+                                        rect1.bottom < rect2.top + offset ||
+                                        rect1.left > rect2.right - offset
+                                    );
+                                }
+                            };
+                            if (AABB.collide(document.getElementById("img"), document.getElementById("Sign"), 20)) {
+                                return true;
+                            }
+                            var diffY = Math.abs(this.y - house.y);
+                            if (ToTheRight) {
+                                if (difference <= 200 && difference > 160 && diffY < height - 100) {
+                                    /*Your At The Door*/
+                                    dude.draw();
+                                    inPrompt = true;
+                                    show_Prompt();
+                                }
+                                if (difference < 300 && diffY < height - 100) {
+                                    return true;
+                                } else {
+                                    if (this.x > screen.availWidth - 50) {
+                                        mapOn = "quest";
+                                        map.l.hide();
+                                        sign.drawing.hide();
+                                        house.drawing.hide();
+                                        map1.drawing.show();
+                                        $(".Zombies").show();
+                                        for (var i = 0; i < zombies.length; i++) {
+                                            zombies[i].needToBeHidden = false;
+                                        }
+                                        player.x = 10;
+                                        return true;
                                     }
-                                    player.x = 10;
-                                    return true;
-                                }
-                                if (this.x < 0 || this.y > screen.availHeight - 80 || this.y < 0) {
-                                    return true;
-                                } else {
+                                    if (this.x < 0 || this.y > screen.availHeight - 80 || this.y < 0) {
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
                                     return false;
                                 }
-                                return false;
-                            }
-                        } else {
-                            if (difference < 30 && diffY < height - 100) {
-                                return true;
                             } else {
-                                if (this.x > screen.availWidth - 50 || this.x < 0 || this.y > screen.availHeight - 80 || this.y < 0) {
+                                if (difference < 30 && diffY < height - 100) {
                                     return true;
                                 } else {
+                                    if (this.x > screen.availWidth - 50 || this.x < 0 || this.y > screen.availHeight - 80 || this.y < 0) {
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
                                     return false;
                                 }
-                                return false;
                             }
-                        }
-                    } else if (mapOn === "shop") {
-                        if (this.x > screen.availWidth - 50 || this.x < 0 || this.y > screen.availHeight - 80) {
-                            return true;
-                        } else if (this.y < 50) {
-                            /* He left the shop */
-                            /* delete map */
-                            $("#shop").hide();
-                            $(".door").hide();
-                            $(".wall").hide();
-                            $(".wall2").hide();
-                            if (not(redstaff.Used)) {
-                                $(".RedStaff").hide();
+                        } else if (mapOn === "shop") {
+                            if (this.x > screen.availWidth - 50 || this.x < 0 || this.y > screen.availHeight - 80) {
+                                return true;
+                            } else if (this.y < 50) {
+                                /* He left the shop */
+                                /* delete map */
+                                $("#shop").hide();
+                                $(".door").hide();
+                                $(".wall").hide();
+                                $(".wall2").hide();
+                                if (not(redstaff.Used)) {
+                                    $(".RedStaff").hide();
+                                }
+                                if (not(greenstaff.Used)) {
+                                    $(".GreenStaff").hide();
+                                }
+                                if (not(sword.Used)) {
+                                    $("#sword").hide();
+                                }
+                                map.l.show();
+                                house.drawing.show();
+                                $("#Sign").show();
+                                mapOn = "start";
+                                player.x = 1000;
                             }
-                            if (not(greenstaff.Used)) {
-                                $(".GreenStaff").hide();
+                        } else if (mapOn === "quest") {
+                            if (this.x > screen.availWidth - 50 || this.y < 0 || this.y > screen.availHeight - 80) {
+                                return true;
+                            } else if (this.x < 0) {
+                                /* He left the quests */
+                                /* delete map */
+                                player.x = window.innerWidth - 70;
+                                $("#questone").hide();
+                                $(".Zombies").hide();
+                                for (var i = 0; i < zombies.length; i++) {
+                                    zombies[i].needToBeHidden = true;
+                                }
+                                map.l.show();
+                                house.drawing.show();
+                                $("#Sign").show();
+                                mapOn = "start";
+                                return;
                             }
-                            if (not(sword.Used)) {
-                                $("#sword").hide();
-                            }
-                            map.l.show();
-                            house.drawing.show();
-                            $("#Sign").show();
-                            mapOn = "start";
-                            player.x = 1000;
-                        }
-                    } else if (mapOn === "quest") {
-                        if (this.x > screen.availWidth - 50 || this.y < 0 || this.y > screen.availHeight - 80) {
-                            return true;
-                        } else if (this.x < 0) {
-                            /* He left the quests */
-                            /* delete map */
-                            player.x = window.innerWidth - 70;
-                            $("#questone").hide();
-                            $(".Zombies").hide();
-                            for (var i = 0; i < zombies.length; i++) {
-                                zombies[i].needToBeHidden = true;
-                            }
-                            map.l.show();
-                            house.drawing.show();
-                            $("#Sign").show();
-                            mapOn = "start";
-                            return;
-                        }
-                        var AABB = {
-                            collide: function (player, el2, offset) {
-                                var rect1 = player.getBoundingClientRect();
-                                var rect2 = el2.getBoundingClientRect();
+                            var AABB = {
+                                collide: function (player, el2, offset) {
+                                    var rect1 = player.getBoundingClientRect();
+                                    var rect2 = el2.getBoundingClientRect();
 
-                                return !(
-                                    rect1.top > rect2.bottom - offset ||
-                                    rect1.right < rect2.left + offset ||
-                                    rect1.bottom < rect2.top + offset ||
-                                    rect1.left > rect2.right - offset
-                                );
-                            }
-                        };
-                        for (var i = 0; i < zombies.length; i++) {
-                            if (zombies[i].alive) {
-                                if (AABB.collide(document.getElementById("img"), document.getElementById("Zombie" + i), 60)) {
-                                    return true;
+                                    return !(
+                                        rect1.top > rect2.bottom - offset ||
+                                        rect1.right < rect2.left + offset ||
+                                        rect1.bottom < rect2.top + offset ||
+                                        rect1.left > rect2.right - offset
+                                    );
+                                }
+                            };
+                            for (var i = 0; i < zombies.length; i++) {
+                                if (zombies[i].alive) {
+                                    if (AABB.collide(document.getElementById("img"), document.getElementById("Zombie" + i), 60)) {
+                                        return true;
+                                    }
                                 }
                             }
                         }
@@ -324,6 +338,10 @@ function game() {
                         }
                     };
                     if (AABB.collide(document.getElementById("img"), document.getElementById("Zombie" + String(this.zombie)), 60)) {
+                        player.health -= 3;
+                        if (player.health <= 0) {
+                            player.die();
+                        }
                         return true;
                     }
                     for (var i = 0; i < zombies.length; i++) {
@@ -776,7 +794,6 @@ function game() {
                     this.Used = false;
                 }
                 draw() {
-                    /* IMPORTANT: WHEN I COME BACK SHOW PRICE IN HTML BY MOUSEOVER :IMPORTANT */
                     var html = '<img class="GreenStaff" onclick="Greenstaff()" onmouseover="onmouseoverGreenStaff()"    onmouseleave="onmouseleaveGreenStaff()" src="' + dot + '/unnamed.png">';
                     this.drawing = $(html);
                     this.drawing.css({
@@ -1500,25 +1517,29 @@ function game() {
             }
             $(".Zombies").hide();
             setInterval(function () {
-                for (var i = 0; i < zombies.length; i++) {
-                    if (zombies[i].alive) {
-                        zombies[i].move();
+                if (player.alive) {
+                    for (var i = 0; i < zombies.length; i++) {
+                        if (zombies[i].alive) {
+                            zombies[i].move();
+                        }
                     }
                 }
             }, zombies[0].Timout)
 
             function animate() {
-                requestAnimationFrame(animate);
-                width2 = window.innerWidth;
-                height2 = window.innerHeight;
-                player.Animate();
-                redstaff.update();
-                redstaffB.update();
-                greenstaff.update();
-                greenstaffB.update();
-                sword.update();
-                for (var i = 0; i < zombies.length; i++) {
-                    zombies[i].updatePosition();
+                if (player.alive) {
+                    requestAnimationFrame(animate);
+                    width2 = window.innerWidth;
+                    height2 = window.innerHeight;
+                    player.Animate();
+                    redstaff.update();
+                    redstaffB.update();
+                    greenstaff.update();
+                    greenstaffB.update();
+                    sword.update();
+                    for (var i = 0; i < zombies.length; i++) {
+                        zombies[i].updatePosition();
+                    }
                 }
             }
 
