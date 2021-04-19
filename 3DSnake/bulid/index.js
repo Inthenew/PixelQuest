@@ -878,16 +878,17 @@ require([
 
                     update() {
                         if (this.Used) {
+                            var img = document.getElementById('img').getBoundingClientRect();
                             if (player.face === "right") {
-                                this.x = player.x + 50;
+                                this.x = img.left + 50;
                             } else if (player.face === "left") {
-                                this.x = player.x - 10;
+                                this.x = img.left - 10;
                             } else if (player.face === "up") {
-                                this.x = player.x + 50;
+                                this.x = img.left + 50;
                             } else if (player.face === "down") {
-                                this.x = player.x - 15;
+                                this.x = img.left - 15;
                             }
-                            this.y = player.y;
+                            this.y = img.top;
                             this.drawing.css({
                                 position: "absolute",
                                 left: this.x,
