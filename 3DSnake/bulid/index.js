@@ -7,6 +7,7 @@ var onmouseleaveRedStaff;
 var onmouseoverGreenStaff;
 var onmouseleaveGreenStaff;
 var equipSword;
+var zombies;
 require([
     'dojo/dom',
     'dojo/fx',
@@ -41,11 +42,18 @@ require([
                 var redstaffBEEN = false;
                 var width2 = window.innerWidth;
                 var height2 = window.innerHeight;
+                var questOn = 1;
                 var TimesEquipedSWORD = 0;
 
                 var quest = {
                     one: {
                         images: {map: '<img id="questone" src="' + dot + '/New Piskel (49).gif">'}
+                    },
+                    two: {
+                        images: {
+                            map: '<img id="map3" src=`${dot}/pixil-frame-0.png`>',
+                            boss: '<img id="boss1" src="' + dot + '/sprite_0 copy.png">'
+                        }
                     }
                 }
 
@@ -125,6 +133,7 @@ require([
                                         break;
                                     case 65: /*a*/
                                         this.face = "left";
+                                        var img = document.getElementById("img").getBoundingClientRect();
                                         this.updateImage('<img id="img" src="' + dot + '/0.gif">', this.x, false, 30, true);
                                         if (this.checkCollision(house, width, height)) {
                                             this.x += 30;
@@ -155,22 +164,23 @@ require([
                                 left: this.x,
                                 top: this.y
                             });
-                            if (b) {
-                                e += p
-                            } else {
-                                e -= p
-                            }
-                            if (c) {
-                                this.x = e;
-                            } else {
-                                this.y = e;
-                            }
                             $("body").append(this.drawing);
-                            fx.slideTo({
-                                node: document.getElementById("img"),
-                                top: this.y,
-                                left: this.x
-                            }).play();
+                                if (b) {
+                                    e += p
+                                } else {
+                                    e -= p
+                                }
+                                if (c) {
+                                    this.x = e;
+                                } else {
+                                    this.y = e;
+                                }
+                                var img = document.getElementById("img").getBoundingClientRect();
+                                fx.slideTo({
+                                    node: document.getElementById("img"),
+                                    top: this.y,
+                                    left: this.x
+                                }).play();
                         }
                     }
 
@@ -191,18 +201,18 @@ require([
                                 }
                                 var AABB = {
                                     collide: function (player, el2, offset) {
-                                        var rect1 = player.getBoundingClientRect();
+                                        var rect1 = player;
                                         var rect2 = el2.getBoundingClientRect();
 
                                         return !(
-                                            rect1.top > rect2.bottom - offset ||
-                                            rect1.right < rect2.left + offset ||
-                                            rect1.bottom < rect2.top + offset ||
-                                            rect1.left > rect2.right - offset
+                                            rect1.y > rect2.bottom - offset ||
+                                            rect1.x + 100 < rect2.left + offset ||
+                                            rect1.y + 100 < rect2.top + offset ||
+                                            rect1.x > rect2.right - offset
                                         );
                                     }
                                 };
-                                if (AABB.collide(document.getElementById("img"), document.getElementById("Sign"), 20)) {
+                                if (AABB.collide(player, document.getElementById("Sign"), 20)) {
                                     return true;
                                 }
                                 var diffY = Math.abs(this.y - house.y);
@@ -218,6 +228,7 @@ require([
                                     } else {
                                         if (this.x > screen.availWidth - 50) {
                                             mapOn = "quest";
+                                            questOn = 1;
                                             map.l.hide();
                                             sign.drawing.hide();
                                             house.drawing.hide();
@@ -274,41 +285,97 @@ require([
                                     player.x = 1000;
                                 }
                             } else if (mapOn === "quest") {
-                                if (this.x > screen.availWidth - 50 || this.y < 0 || this.y > screen.availHeight - 80) {
-                                    return true;
-                                } else if (this.x < 0) {
-                                    /* He left the quests */
-                                    /* delete map */
-                                    player.x = window.innerWidth - 70;
-                                    $("#questone").hide();
-                                    $(".Zombies").hide();
-                                    for (var i = 0; i < zombies.length; i++) {
-                                        zombies[i].needToBeHidden = true;
-                                    }
-                                    map.l.show();
-                                    house.drawing.show();
-                                    $("#Sign").show();
-                                    mapOn = "start";
-                                    return;
-                                }
-                                var AABB = {
-                                    collide: function (player, el2, offset) {
-                                        var rect1 = player.getBoundingClientRect();
-                                        var rect2 = el2.getBoundingClientRect();
-
-                                        return !(
-                                            rect1.top > rect2.bottom - offset ||
-                                            rect1.right < rect2.left + offset ||
-                                            rect1.bottom < rect2.top + offset ||
-                                            rect1.left > rect2.right - offset
-                                        );
-                                    }
-                                };
-                                for (var i = 0; i < zombies.length; i++) {
-                                    if (zombies[i].alive) {
-                                        if (AABB.collide(document.getElementById("img"), document.getElementById("Zombie" + i), 60)) {
-                                            return true;
+                                if (questOn === 1) {
+                                    if (this.y < 0 || this.y > screen.availHeight - 80) {
+                                        return true;
+                                    } else if (this.x < 0) {
+                                        /* He left the quests */
+                                        /* delete map */
+                                        player.x = window.innerWidth - 70;
+                                        $("#questone").hide();
+                                        $(".Zombies").hide();
+                                        for (var i = 0; i < zombies.length; i++) {
+                                            zombies[i].needToBeHidden = true;
                                         }
+                                        map.l.show();
+                                        house.drawing.show();
+                                        $("#Sign").show();
+                                        mapOn = "start";
+                                        return;
+                                    } else if (this.x > screen.availWidth - 50) {
+                                        for (var i = 0; i < zombies.length; i++) {
+                                            if (zombies[i].alive) {
+                                                questOn = 1;
+                                                return true;
+                                            }
+                                        }
+                                        /*enterd second quest!*/
+                                        boss.drawing.show();
+                                        fx.slideTo({
+                                            node: document.getElementById('img'),
+                                            left: window.innerWidth - 70,
+                                            top: player.y
+                                        })
+                                        player.x = window.innerWidth - 70;
+                                        $("#questone").hide();
+                                        questOn = 2;
+                                    }
+                                    var AABB = {
+                                        collide: function (player, el2, offset) {
+                                            var rect1 = player;
+                                            var rect2 = el2.getBoundingClientRect();
+
+                                            return !(
+                                                rect1.y > rect2.bottom - offset ||
+                                                rect1.x + 100 < rect2.left + offset ||
+                                                rect1.y + 100 < rect2.top + offset ||
+                                                rect1.x > rect2.right - offset
+                                            );
+                                        }
+                                    };
+                                    for (var i = 0; i < zombies.length; i++) {
+                                        if (zombies[i].alive) {
+                                            if (AABB.collide(player, document.getElementById("Zombie" + i), 60)) {
+                                                return true;
+                                            }
+                                        }
+                                    }
+                                } else if (questOn === 2) {
+                                    if (this.y < 0 || this.y > screen.availHeight - 80) {
+                                        return true;
+                                    } else if (this.x < 0) {
+                                        /*Left the quest!*/
+                                        boss.drawing.hide();
+                                        mapOn = "quest";
+                                        questOn = 1;
+                                        map.l.hide();
+                                        sign.drawing.hide();
+                                        house.drawing.hide();
+                                        map1.drawing.show();
+                                        $(".Zombies").show();
+                                        for (var i = 0; i < zombies.length; i++) {
+                                            zombies[i].needToBeHidden = false;
+                                        }
+                                        player.x = window.innerWidth - 70;
+                                    } else if (this.x > screen.availWidth - 50) {
+                                        /*enterd third quest!*/
+                                        return true;
+                                    }
+                                    var AABB = {
+                                        collide: function (player, el2, offset) {
+                                            var rect1 = player;
+                                            var rect2 = el2.getBoundingClientRect();
+
+                                            return !(
+                                                rect1.y > rect2.bottom - offset ||
+                                                rect1.x + 100 < rect2.left + offset ||
+                                                rect1.y + 100 < rect2.top + offset ||
+                                                rect1.x > rect2.right - offset
+                                            );
+                                        }
+                                    };
+                                    if(AABB.collide(player, document.getElementById('boss1'), 20)) {
+                                        return true;
                                     }
                                 }
                             }
@@ -380,7 +447,20 @@ require([
                                 );
                             }
                         };
-                        if (AABB.collide(document.getElementById("img"), document.getElementById("Zombie" + String(this.zombie)), 60)) {
+                        var AABB2 = {
+                            collide: function (player, el2, offset) {
+                                var rect1 = player;
+                                var rect2 = el2.getBoundingClientRect();
+
+                                return !(
+                                    rect1.y > rect2.bottom - offset ||
+                                    rect1.x + 100 < rect2.left + offset ||
+                                    rect1.y + 100 < rect2.top + offset ||
+                                    rect1.x > rect2.right - offset
+                                );
+                            }
+                        };
+                        if (AABB2.collide(player, document.getElementById("Zombie" + String(this.zombie)), 60)) {
                             player.health -= 3;
                             if (player.health <= 0) {
                                 player.die();
@@ -482,6 +562,29 @@ require([
                     $("#text").text(text)
                 }
 
+                //
+                //
+                //
+                class Boss {
+                    constructor(x, y) {
+                        this.x = x;
+                        this.y = y;
+                    }
+
+                    draw() {
+                        this.html = quest.two.images.boss;
+                        this.drawing = $(this.html);
+                        this.drawing.css({
+                            position: "absolute",
+                            left: this.x,
+                            top: this.y
+                        })
+                        $("body").append(this.drawing);
+                    }
+                }
+                //
+                //
+                //
                 // unnamed.gif
                 class Map {
                     constructor() {
@@ -1598,11 +1701,14 @@ require([
                 var sword = new Sword(10, 10);
                 sword.draw();
                 equip(sword);
-                var zombies = [new Zombie(100, 200, 0), new Zombie(500, 500, 1), new Zombie(700, 700, 2), new Zombie(20, 900, 3), new Zombie(1000, 300, 4)];
+                zombies = [new Zombie(100, 200, 0), new Zombie(500, 500, 1), new Zombie(700, 700, 2), new Zombie(20, 900, 3), new Zombie(1000, 300, 4)];
                 for (var i = 0; i < zombies.length; i++) {
                     zombies[i].draw();
                 }
                 $(".Zombies").hide();
+                var boss = new Boss(window.innerWidth / 2, window.innerHeight / 2);
+                boss.draw();
+                boss.drawing.hide();
                 setInterval(function () {
                     if (player.alive) {
                         for (var i = 0; i < zombies.length; i++) {
