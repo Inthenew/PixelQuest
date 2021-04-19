@@ -36,8 +36,8 @@ body {
 #redStaffStats {
     position: fixed;
     z-index: 210;
-    left: 90%;
-    top: 15%;
+    left: 90.5%;
+    top: 18%;
     font-family: arial, sans-serf;
     padding: 30px 50px;
     background: #fff;
