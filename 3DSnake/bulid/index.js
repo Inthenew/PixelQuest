@@ -1,3 +1,17 @@
+var ok;
+/* First weapon */
+var Redstaff;
+var Greenstaff;
+var onmouseoverRedStaff;
+var onmouseleaveRedStaff;
+var onmouseoverGreenStaff;
+var onmouseleaveGreenStaff;
+var equipSword;
+require([
+    'dojo/dom',
+    'dojo/fx',
+    'dojo/domReady!'
+], function (dom, fx) {
 $("#textBox").hide();
 $("#gold").hide();
 $("#redStaffStats").hide();
@@ -14,16 +28,7 @@ alert("click to start!");
 /* have you joined the game? */
 var been = false;
 /* when click to continue gets clicked */
-var ok;
 var dot = 'https://inthenew.github.io/PixelQuest/3DSnake//bulid/models'
-/* First weapon */
-var Redstaff;
-var Greenstaff;
-var onmouseoverRedStaff;
-var onmouseleaveRedStaff;
-var onmouseoverGreenStaff;
-var onmouseleaveGreenStaff;
-var equipSword;
 
 function game() {
     if (not(been)) {
@@ -79,35 +84,51 @@ function game() {
                         if (!inPrompt) {
                             switch (e.keyCode) {
                                 case 87: /*w*/
-                                    this.y -= 10;
                                     this.face = "up";
-                                    this.updateImage('<img id="img" src="' + dot + '/0-1.gif">');
+                                    this.updateImage('<img id="img" src="' + dot + '/0-1.gif">', this.y, false, 30, false);
                                     if (this.checkCollision(house, width, height)) {
-                                        this.y += 10;
+                                        this.y += 30;
+                                        fx.slideTo({
+                                            node: document.getElementById("img"),
+                                            top: this.y,
+                                            left: this.x
+                                        }).play();
                                     }
                                     break;
                                 case 83: /*s*/
-                                    this.y += 10;
                                     this.face = "down";
-                                    this.updateImage('<img id="img" src="' + dot + '/0-3.gif">');
+                                    this.updateImage('<img id="img" src="' + dot + '/0-3.gif">', this.y, true, 30, false);
                                     if (this.checkCollision(house, width, height)) {
-                                        this.y -= 10;
+                                        this.y -= 30;
+                                        fx.slideTo({
+                                            node: document.getElementById("img"),
+                                            top: this.y,
+                                            left: this.x
+                                        }).play();
                                     }
                                     break;
                                 case 68: /*d*/
-                                    this.x += 10;
                                     this.face = "right";
-                                    this.updateImage('<img id="img" src="' + dot + '/0-2.gif">');
+                                    this.updateImage('<img id="img" src="' + dot + '/0-2.gif">', this.x, true, 30, true);
                                     if (this.checkCollision(house, width, height)) {
-                                        this.x -= 10;
+                                        this.x -= 30;
+                                        fx.slideTo({
+                                            node: document.getElementById("img"),
+                                            top: this.y,
+                                            left: this.x
+                                        }).play();
                                     }
                                     break;
                                 case 65: /*a*/
-                                    this.x -= 10;
                                     this.face = "left";
-                                    this.updateImage('<img id="img" src="' + dot + '/0.gif">');
+                                    this.updateImage('<img id="img" src="' + dot + '/0.gif">', this.x, false, 30, true);
                                     if (this.checkCollision(house, width, height)) {
-                                        this.x += 10;
+                                        this.x += 30;
+                                        fx.slideTo({
+                                            node: document.getElementById("img"),
+                                            top: this.y,
+                                            left: this.x
+                                        }).play();
                                     }
                                     break;
                             }
@@ -116,14 +137,9 @@ function game() {
                 }
                 Animate() {
                     if (this.alive) {
-                        this.drawing.css({
-                            position: "absolute",
-                            left: this.x,
-                            top: this.y
-                        });
                     }
                 }
-                updateImage(to) {
+                updateImage(to, e, b, p, c) {
                     if (this.alive) {
                         document.getElementById('img').remove();
                         var html = to;
@@ -133,7 +149,22 @@ function game() {
                             left: this.x,
                             top: this.y
                         });
+                        if (b) {
+                            e += p
+                        } else {
+                            e -= p
+                        }
+                        if (c) {
+                            this.x = e;
+                        } else {
+                            this.y = e;
+                        }
                         $("body").append(this.drawing);
+                        fx.slideTo({
+                            node: document.getElementById("img"),
+                            top: this.y,
+                            left: this.x
+                        }).play();
                     }
                 }
                 checkCollision(house, width, height) {
@@ -599,16 +630,17 @@ function game() {
                 }
                 update() {
                     if (this.Used) {
+                        var img = document.getElementById('img').getBoundingClientRect();
                         if (player.face === "right") {
-                            this.x = player.x + 50;
+                            this.x = img.left + 50;
                         } else if (player.face === "left") {
-                            this.x = player.x - 10;
+                            this.x = img.left - 10;
                         } else if (player.face === "up") {
-                            this.x = player.x + 50;
+                            this.x = img.left + 50;
                         } else if (player.face === "down") {
-                            this.x = player.x - 15;
+                            this.x = img.left - 15;
                         }
-                        this.y = player.y;
+                        this.y = img.top;
                         this.drawing.css({
                             position: "absolute",
                             left: this.x,
@@ -1102,21 +1134,22 @@ function game() {
                 }
                 update() {
                     if (this.Used) {
+                        var img = document.getElementById('img').getBoundingClientRect();
                         if (player.face === "right") {
-                            this.x = player.x + 50;
+                            this.x = img.left + 50;
                             this.face = "right";
                         } else if (player.face === "left") {
-                            this.x = player.x - 10;
+                            this.x = img.left - 10;
                             this.face = "left";
                         } else if (player.face === "up") {
-                            this.x = player.x + 50;
+                            this.x = img.left + 50;
                             this.face = "up";
                         } else if (player.face === "down") {
-                            this.x = player.x - 15;
+                            this.x = img.left - 15;
                             this.face = "down";
                         }
 
-                        this.y = player.y;
+                        this.y = document.getElementById('img').style.top;
                         this.drawing.css({
                             position: "absolute",
                             left: this.x,
@@ -1590,7 +1623,7 @@ document.addEventListener('mousedown', function () {
                     backgroundColor: 'rgb(255, 255, 255)'
                 })
                 $("#gold").show();
-                if (not(been) && confirm('Full screen failed: No FullScreen? (ok: yes; cancel: try agian)') && not(pickedCancel)) {
+                if (not(been) && confirm('Full screen failed: No FullScreen? (ok: yes; cancel: try again)') && not(pickedCancel)) {
                     pickedCancel = true;
                     game();
                 } else {
@@ -1612,7 +1645,7 @@ document.addEventListener('mousedown', function () {
                 backgroundColor: 'rgb(255, 255, 255)'
             })
             $("#gold").show();
-            if (not(been) && confirm('Full screen failed: No FullScreen? (ok: yes; cancel: try agian)') && not(pickedCancel)) {
+            if (not(been) && confirm('Full screen failed: No FullScreen? (ok: yes; cancel: try again)') && not(pickedCancel)) {
                 pickedCancel = true;
                 game();
             } else {
@@ -1622,3 +1655,4 @@ document.addEventListener('mousedown', function () {
     }
 }
 )
+});
