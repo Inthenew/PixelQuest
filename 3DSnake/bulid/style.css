@@ -1,0 +1,47 @@
+body {
+    margin: 0;
+    overflow-y: hidden;
+    /* Hide vertical scrollbar */
+    overflow-x: hidden;
+    /* Hide horizontal scrollbar */
+    height: 100%;
+}
+#textBox {
+    position: fixed;
+    z-index: 210;
+    left: 23%;
+    top: 75%;
+    font-family: arial, sans-serf;
+    padding: 3% 30%;
+    background: #fff;
+    border: 2px solid #ddd;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, .15);
+    border-radius: 10px;
+}
+#button {
+    position: fixed;
+}
+#gold {
+    position: fixed;
+    z-index: 210;
+    left: 88%;
+    top: 6%;
+    font-family: arial, sans-serf;
+    padding: 2% 2%;
+    background: #fff;
+    border: 2px solid #ddd;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, .15);
+    border-radius: 10px;
+}
+#redStaffStats {
+    position: fixed;
+    z-index: 210;
+    left: 75%;
+    top: 6%;
+    font-family: arial, sans-serf;
+    padding: 2% 2%;
+    background: #fff;
+    border: 2px solid #ddd;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, .15);
+    border-radius: 10px;
+}
