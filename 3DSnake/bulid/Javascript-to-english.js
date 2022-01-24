@@ -15,11 +15,8 @@ function when(condition, callBack, stop_after_run) {
 
         function repeat() {
             if (condition) {
-                goingTobeeOutSoon = true;
-                callBack();
-            }
-            if (goingTobeeOutSoon) {
                 hasBeenTrue = true;
+                callBack();
             }
             if (!hasBeenTrue) {
                 requestAnimationFrame(repeat)
@@ -33,18 +30,23 @@ function when(condition, callBack, stop_after_run) {
 function equal(one, two) {
     return one === two;
 }
+
 function greaterThan(one, two) {
     return one > two;
 }
+
 function lessThan(one, two) {
     return one < two;
 }
+
 function lessThanOrEqualTo(one, two) {
     return one <= two;
 }
+
 function greaterThanOrEqualTo(one, two) {
     return one >= two;
 }
+
 function nothing() {
     return undefined;
 }
