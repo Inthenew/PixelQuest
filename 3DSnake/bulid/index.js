@@ -8,13 +8,15 @@ var onmouseoverGreenStaff;
 var onmouseleaveGreenStaff;
 var equipSword;
 var zombies;
+var bossKilled = false;
+let levelOn = 1;
 window.__ = undefined;
 const isNull = value => typeof value === "object" && !value;
 require([
     'dojo/dom',
     'dojo/fx',
     'dojo/domReady!'
-], function(dom, fx) {
+], function (dom, fx) {
     $("#textBox").hide();
     $("#gold").hide();
     $("#redStaffStats").hide();
@@ -50,7 +52,7 @@ require([
 
                 var quest = {
                     one: {
-                        images: { map: '<img id="questone" src="' + dot + '/New Piskel (49).gif">' }
+                        images: {map: '<img id="questone" src="' + dot + '/New Piskel (49).gif">'}
                     },
                     two: {
                         images: {
@@ -174,7 +176,8 @@ require([
                     }
 
                     Animate() {
-                        if (this.alive) {}
+                        if (this.alive) {
+                        }
                     }
 
                     updateImage(to, e, b, p, c) {
@@ -223,7 +226,7 @@ require([
                                     difference = house.x - this.x;
                                 }
                                 var AABB = {
-                                    collide: function(player, el2, offset) {
+                                    collide: function (player, el2, offset) {
                                         var rect1 = player;
                                         var rect2 = el2.getBoundingClientRect();
 
@@ -335,11 +338,14 @@ require([
                                         for (var i = 0; i < zombies.length; i++) {
                                             if (zombies[i].alive) {
                                                 questOn = 1;
+                                                levelOn = 1;
                                                 return true;
                                             }
                                         }
+                                        levelOn = 2;
                                         /*enterd second quest!*/
                                         boss.drawing.show();
+                                        boss.drawing23.show();
                                         level2map.l.show();
                                         fx.slideTo({
                                             node: document.getElementById('img'),
@@ -351,7 +357,7 @@ require([
                                         questOn = 2;
                                     }
                                     var AABB = {
-                                        collide: function(player, el2, offset) {
+                                        collide: function (player, el2, offset) {
                                             var rect1 = player;
                                             var rect2 = el2.getBoundingClientRect();
 
@@ -376,6 +382,8 @@ require([
                                     } else if (this.x < 0) {
                                         /*Left the quest!*/
                                         boss.drawing.hide();
+                                        boss.drawing23.hide();
+                                        $('.bossBullet').hide();
                                         level2map.l.hide();
                                         mapOn = "quest";
                                         questOn = 1;
@@ -393,7 +401,7 @@ require([
                                         return true;
                                     }
                                     var AABB = {
-                                        collide: function(player, el2, offset) {
+                                        collide: function (player, el2, offset) {
                                             var rect1 = player;
                                             var rect2 = el2.getBoundingClientRect();
 
@@ -405,8 +413,10 @@ require([
                                             );
                                         }
                                     };
-                                    if (AABB.collide(player, document.getElementById('boss1'), 20)) {
-                                        return true;
+                                    if (boss.alive) {
+                                        if (AABB.collide(player, document.getElementById('boss1'), 20)) {
+                                            return true;
+                                        }
                                     }
                                 }
                             }
@@ -443,9 +453,27 @@ require([
                     }
 
                     die() {
-                        var p = this;
-                        document.getElementById(`Zombie${String(p.zombie)}`).remove();
                         this.alive = false;
+                        document.getElementById(`Zombie${String(this.zombie)}`).remove();
+                        let foundAliveZomb = false;
+                        for (var i = 0; i < zombies.length; i++) {
+                            if (zombies[i].alive) {
+                                questOn = 1;
+                                levelOn = 1;
+                                foundAliveZomb = true;
+                            }
+                        }
+                        if (!foundAliveZomb && bossKilled) {
+                            boss.reborn();
+                            levelOn = 2;
+                        }
+                    }
+
+                    reborn() {
+                        this.alive = true;
+                        this.draw();
+                        this.drawing.hide();
+                        this.health = 10;
                     }
 
                     NumberToFace(number) {
@@ -466,7 +494,7 @@ require([
                             return true;
                         }
                         var AABB = {
-                            collide: function(player, el2, offset) {
+                            collide: function (player, el2, offset) {
                                 var rect1 = player.getBoundingClientRect();
                                 var rect2 = el2.getBoundingClientRect();
 
@@ -479,7 +507,7 @@ require([
                             }
                         };
                         var AABB2 = {
-                            collide: function(player, el2, offset) {
+                            collide: function (player, el2, offset) {
                                 var rect1 = player;
                                 var rect2 = el2.getBoundingClientRect();
 
@@ -592,6 +620,7 @@ require([
                     text = String(text);
                     $("#text").text(text)
                 }
+
                 class Level2Map {
                     constructor() {
                         this.html = quest.two.images.map;
@@ -604,24 +633,40 @@ require([
                         $("body").append(this.l);
                     }
                 }
+
                 let level2map = new Level2Map();
                 level2map.l.hide();
-                //
-                //
-                //
+
                 class Boss {
                     constructor(x, y) {
                         this.x = x;
                         this.y = y;
                         this.bulletSpeed = 50;
                         this.alive = true;
-                        this.health = 10;
+                        this.health = 60;
+                        this.startHealth = this.health;
                         this.bullets = [];
                     }
+
                     die() {
                         this.alive = false;
                         this.drawing23.remove();
+                        bossKilled = true;
+                        levelOn = 1;
                     }
+
+                    reborn() {
+                        this.alive = true;
+                        this.draw();
+                        if (mapOn !== 2) {
+                            this.drawing23.hide();
+                            if (this.drawing !== __) {
+                                this.drawing.hide();
+                            }
+                        }
+                        this.health = this.startHealth;
+                    }
+
                     draw() {
                         this.html = quest.two.images.boss;
                         this.drawing23 = $(this.html);
@@ -635,6 +680,7 @@ require([
                         })
                         $("body").append(this.drawing23);
                     }
+
                     AABB(player, el2, offset) {
                         var rect1 = player.get(0).getBoundingClientRect();
                         var rect2 = el2.getBoundingClientRect();
@@ -645,8 +691,8 @@ require([
                             rect1.left > rect2.right - offset
                         );
                     }
+
                     checkCollision(x, y, bullet) {
-                        // // TODO: !Check collision with walls, not sign! //
                         if (this.AABB(bullet, document.getElementById('img'), 20)) {
                             player.health -= 3;
                             if (player.health <= 0) {
@@ -658,9 +704,11 @@ require([
                             return true;
                         }
                     }
+
                     destroyBullet(bullet) {
                         bullet.remove();
                     }
+
                     drawBullet(dir) {
                         if (mapOn === 'quest') {
                             if (questOn === 2) {
@@ -705,6 +753,7 @@ require([
                             }
                         }
                     }
+
                     async shoot() {
                         if (this.alive) {
                             await this.drawBullet('left');
@@ -713,6 +762,7 @@ require([
                             await this.drawBullet('down');
                         }
                     }
+
                     update() {
                         if (this.alive) {
                             this.drawing23.css({
@@ -724,9 +774,6 @@ require([
                     }
                 }
 
-                //
-                //
-                //
                 // unnamed.gif
                 class Map {
                     constructor() {
@@ -761,7 +808,7 @@ require([
                     }
                 }
 
-                document.onmousedown = function(e) {
+                document.onmousedown = function (e) {
                     e.preventDefault();
                 }
 
@@ -1021,7 +1068,7 @@ require([
                             }
                             //
                             var AABB = {
-                                collide: function(player, el2, offset) {
+                                collide: function (player, el2, offset) {
                                     var rect1 = player.getBoundingClientRect();
                                     var rect2 = el2.getBoundingClientRect();
 
@@ -1070,7 +1117,7 @@ require([
                                 return true;
                             }
                             var AABB = {
-                                collide: function(player, el2, offset) {
+                                collide: function (player, el2, offset) {
                                     var rect1 = player.getBoundingClientRect();
                                     var rect2 = el2.getBoundingClientRect();
 
@@ -1099,11 +1146,17 @@ require([
                             } else if (questOn === 2) {
                                 if (boss.alive) {
                                     if (AABB.collide(document.getElementById("RedStaffB"), document.getElementById(`boss1`), 0)) {
-                                        boss.health -= 2;
+                                        boss.health -= 3;
                                         if (boss.health <= 0) {
                                             boss.die();
                                             gold += 7;
                                             $(".gold").text(String(gold));
+                                            /** We will loop the levels. **/
+                                            for (const zom of zombies) {
+                                                zom.reborn();
+                                                zom.needToBeHidden = true;
+                                                levelOn = 1;
+                                            }
                                         }
                                         return true;
                                     }
@@ -1271,7 +1324,7 @@ require([
                             }
                             //
                             var AABB = {
-                                collide: function(player, el2, offset) {
+                                collide: function (player, el2, offset) {
                                     var rect1 = player.getBoundingClientRect();
                                     var rect2 = el2.getBoundingClientRect();
 
@@ -1320,7 +1373,7 @@ require([
                                 return true;
                             }
                             var AABB = {
-                                collide: function(player, el2, offset) {
+                                collide: function (player, el2, offset) {
                                     var rect1 = player.getBoundingClientRect();
                                     var rect2 = el2.getBoundingClientRect();
 
@@ -1332,17 +1385,39 @@ require([
                                     );
                                 }
                             };
-                            for (var i = 0; i < zombies.length; i++) {
-                                if (zombies[i].alive) {
-                                    if (AABB.collide(document.getElementById("GreenStaffB"), document.getElementById(`Zombie${i}`), 0)) {
-                                        zombies[i].health -= 0.1;
-                                        zombies[i].health -= 3;
-                                        if (zombies[i].health <= 0) {
-                                            zombies[i].die();
-                                            gold++;
-                                            $(".gold").text(String(gold))
+                            if (levelOn === 1) {
+                                for (var i = 0; i < zombies.length; i++) {
+                                    if (zombies[i].alive) {
+                                        if (AABB.collide(document.getElementById("GreenStaffB"), document.getElementById(`Zombie${i}`), 0)) {
+                                            zombies[i].health -= 0.1;
+                                            zombies[i].health -= 3;
+                                            if (zombies[i].health <= 0) {
+                                                zombies[i].die();
+                                                gold++;
+                                                $(".gold").text(String(gold))
+                                            }
+                                            return true;
                                         }
-                                        return true;
+                                    }
+                                }
+                            } else if (levelOn === 2) {
+                                if (boss.alive) {
+                                    if (!isNull(document.getElementById('boss1'))) {
+                                        if (AABB.collide(document.getElementById('GreenStaffB'), document.getElementById('boss1'), 0)) {
+                                            boss.health -= 3;
+                                            if (boss.health <= 0) {
+                                                boss.die();
+                                                levelOn = 1;
+                                                gold += 7;
+                                                $(".gold").text(String(gold));
+                                                for (const zom of zombies) {
+                                                    zom.reborn();
+                                                    zom.needToBeHidden = true;
+                                                    levelOn = 1;
+                                                }
+                                            }
+                                            return true;
+                                        }
                                     }
                                 }
                             }
@@ -1364,7 +1439,7 @@ require([
 
                 var greenstaff = new GreenStaff(300, 100);
                 var greenstaffB = new GreenStaffB(300, 100);
-                Greenstaff = function() {
+                Greenstaff = function () {
                     $(".gold").text(gold);
                     if (greenstaffBEEN) {
                         equip(greenstaff);
@@ -1464,7 +1539,7 @@ require([
                             });
                             if (this.justHit) {
                                 var AABB = {
-                                    collide: function(player, el2, offset) {
+                                    collide: function (player, el2, offset) {
                                         var rect1 = player.getBoundingClientRect();
                                         var rect2 = el2.getBoundingClientRect();
 
@@ -1476,15 +1551,32 @@ require([
                                         );
                                     }
                                 };
-
+                                let foundZombie = false;
                                 for (var i = 0; i < zombies.length; i++) {
                                     if (zombies[i].alive) {
+                                        foundZombie = true;
                                         if (AABB.collide(document.getElementById("sword"), document.getElementById(`Zombie${i}`), 40)) {
                                             zombies[i].health -= 0.5;
                                             if (zombies[i].health <= 0) {
                                                 zombies[i].die();
                                                 gold++;
+                                                levelOn = 2;
                                                 $(".gold").text(String(gold))
+                                            }
+                                        }
+                                    }
+                                }
+                                if (!foundZombie) {
+                                    if (AABB.collide(document.getElementById("sword"), document.getElementById('boss1'), 40)) {
+                                        boss.health -= 3;
+                                        if (boss.health <= 0) {
+                                            boss.die();
+                                            gold += 7;
+                                            $(".gold").text(String(gold));
+                                            for (const zom of zombies) {
+                                                zom.reborn();
+                                                zom.needToBeHidden = true;
+                                                levelOn = 1;
                                             }
                                         }
                                     }
@@ -1495,7 +1587,7 @@ require([
                     }
                 }
 
-                equipSword = function() {
+                equipSword = function () {
                     if (not(sword.Used)) {
                         equip(sword);
                     }
@@ -1607,7 +1699,7 @@ require([
                 var wall4 = new WallTurned(window.innerWidth - 100, 0);
                 var redstaff = new RedStaff(160, 100);
                 var redstaffB = new RedStaffBULLET(160, 100);
-                var gold = 0;
+                var gold = 100;
                 document.getElementById("price").innerHTML = "Price: " + String(redstaff.price);
                 onmouseoverRedStaff = () => {
                     if (not(redstaffBEEN)) {
@@ -1629,84 +1721,84 @@ require([
                     $("#redStaffStats").hide();
                 }
                 $(".gold").text(gold);
-                document.onclick = function(e) {
-                        if (!inPrompt) {
-                            if (redstaff.Used) {
-                                redstaffB.justShot = true;
-                                var t = setTimeout(function() {
+                document.onclick = function (e) {
+                    if (!inPrompt) {
+                        if (redstaff.Used) {
+                            redstaffB.justShot = true;
+                            var t = setTimeout(function () {
+                                redstaffB.justShot = false;
+                                redstaffB.distaceShot = 0;
+                                redstaffB.movedShot = false;
+                                $(".RedStaffB").hide();
+                            }, 1000)
+                            var int = setInterval(function () {
+                                if (redstaffB.checkCollision(house, 400, 400)) {
+                                    clearInterval(int);
+                                    clearTimeout(t);
                                     redstaffB.justShot = false;
                                     redstaffB.distaceShot = 0;
                                     redstaffB.movedShot = false;
                                     $(".RedStaffB").hide();
-                                }, 1000)
-                                var int = setInterval(function() {
-                                    if (redstaffB.checkCollision(house, 400, 400)) {
-                                        clearInterval(int);
-                                        clearTimeout(t);
-                                        redstaffB.justShot = false;
-                                        redstaffB.distaceShot = 0;
-                                        redstaffB.movedShot = false;
-                                        $(".RedStaffB").hide();
-                                    }
-                                })
-                            } else if (greenstaff.Used) {
-                                greenstaffB.justShot = true;
-                                var t = setTimeout(function() {
+                                }
+                            })
+                        } else if (greenstaff.Used) {
+                            greenstaffB.justShot = true;
+                            var t = setTimeout(function () {
+                                greenstaffB.justShot = false;
+                                greenstaffB.distaceShot = 0;
+                                greenstaffB.movedShot = false;
+                                $(".GreenStaffB").hide();
+                            }, 1000)
+                            var int = setInterval(function () {
+                                if (greenstaffB.checkCollision(house, 400, 400)) {
+                                    clearInterval(int);
+                                    clearTimeout(t);
                                     greenstaffB.justShot = false;
                                     greenstaffB.distaceShot = 0;
                                     greenstaffB.movedShot = false;
                                     $(".GreenStaffB").hide();
-                                }, 1000)
-                                var int = setInterval(function() {
-                                    if (greenstaffB.checkCollision(house, 400, 400)) {
-                                        clearInterval(int);
-                                        clearTimeout(t);
-                                        greenstaffB.justShot = false;
-                                        greenstaffB.distaceShot = 0;
-                                        greenstaffB.movedShot = false;
-                                        $(".GreenStaffB").hide();
-                                    }
-                                })
-                            } else if (sword.Used) {
-                                if (not(sword.justHit)) {
-                                    if (sword.face === "right") {
-                                        sword.drawing.css({
-                                            position: "absolute",
-                                            left: sword.x,
-                                            top: sword.y,
-                                            width: sword.width,
-                                            height: sword.height,
-                                            transform: 'rotate(45deg)'
-                                        })
-                                    } else if (sword.face === "left") {
-                                        sword.drawing.css({
-                                            position: "absolute",
-                                            left: sword.x,
-                                            top: sword.y,
-                                            width: sword.width,
-                                            height: sword.height,
-                                            transform: 'rotate(-45deg)'
-                                        })
-                                    }
-                                    sword.justHit = true;
-                                    setTimeout(function() {
-                                        sword.justHit = false;
-                                        sword.drawing.css({
-                                            position: "absolute",
-                                            left: sword.x,
-                                            top: sword.y,
-                                            width: sword.width,
-                                            height: sword.height,
-                                            transform: 'rotate(0deg)'
-                                        })
-                                    }, 200)
                                 }
+                            })
+                        } else if (sword.Used) {
+                            if (not(sword.justHit)) {
+                                if (sword.face === "right") {
+                                    sword.drawing.css({
+                                        position: "absolute",
+                                        left: sword.x,
+                                        top: sword.y,
+                                        width: sword.width,
+                                        height: sword.height,
+                                        transform: 'rotate(45deg)'
+                                    })
+                                } else if (sword.face === "left") {
+                                    sword.drawing.css({
+                                        position: "absolute",
+                                        left: sword.x,
+                                        top: sword.y,
+                                        width: sword.width,
+                                        height: sword.height,
+                                        transform: 'rotate(-45deg)'
+                                    })
+                                }
+                                sword.justHit = true;
+                                setTimeout(function () {
+                                    sword.justHit = false;
+                                    sword.drawing.css({
+                                        position: "absolute",
+                                        left: sword.x,
+                                        top: sword.y,
+                                        width: sword.width,
+                                        height: sword.height,
+                                        transform: 'rotate(0deg)'
+                                    })
+                                }, 200)
                             }
                         }
                     }
-                    //
-                    //
-                    /* This is When you Buy it! */
+                }
+                //
+                //
+                /* This is When you Buy it! */
                 Redstaff = () => {
                     $(".gold").text(gold);
                     if (redstaffBEEN) {
@@ -1734,7 +1826,7 @@ require([
                         }
                     }
                 }
-                ok = function() {
+                ok = function () {
                     if (text_on === "You need: " + Math.abs(gold - redstaff.price) + " more gold!") {
                         hide_Prompt();
                         text_on = "Hello Adventurers!";
@@ -1810,7 +1902,7 @@ require([
                             $(".GreenStaff").show();
                         }
                     }
-                    add_text(text_on)
+                    add_text(text_on);
                 }
 
                 //
@@ -1866,7 +1958,7 @@ require([
                 window.boss = boss;
                 boss.draw();
                 boss.drawing.hide();
-                setInterval(function() {
+                setInterval(function () {
                     if (player.alive) {
                         for (var i = 0; i < zombies.length; i++) {
                             if (zombies[i].alive) {
@@ -1875,7 +1967,7 @@ require([
                         }
                     }
                 }, zombies[0].Timout)
-                setInterval(function() {
+                setInterval(function () {
                     if (player.alive) {
                         boss.shoot();
                     }
@@ -1893,7 +1985,7 @@ require([
                     }
                 }
 
-                setInterval(function() {
+                setInterval(function () {
                     if (player.alive) {
                         if (player.health <= 8) {
                             player.health += 2;
@@ -1922,7 +2014,7 @@ require([
 
 
                 animate();
-                $("body").keydown(function(e) {
+                $("body").keydown(function (e) {
                     player.KeyDown(e, house, 400, 400);
                 })
             } else {
@@ -1933,10 +2025,10 @@ require([
 
 
     var pickedCancel = false;
-    document.addEventListener('mousedown', function() {
+    document.addEventListener('mousedown', function () {
         if (BigScreen.enabled) {
             var instructions = this
-            BigScreen.request(document.body /*renderer.domElement*/ , function() {
+            BigScreen.request(document.body /*renderer.domElement*/, function () {
                 $("body").css({
                     margin: 0,
                     overflowY: 'hidden',
@@ -1948,7 +2040,8 @@ require([
                 })
                 $("#gold").show();
                 game();
-            }, function() {}, function() {
+            }, function () {
+            }, function () {
                 if (not(pickedCancel)) {
                     $("body").css({
                         margin: 0,
@@ -1992,6 +2085,4 @@ require([
         }
     })
 });
-// Make second level
-// Make second level
-// Make second level
+/** After level 2, it will loop. **/
