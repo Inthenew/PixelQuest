@@ -1404,7 +1404,7 @@ require([
                                 if (boss.alive) {
                                     if (!isNull(document.getElementById('boss1'))) {
                                         if (AABB.collide(document.getElementById('GreenStaffB'), document.getElementById('boss1'), 0)) {
-                                            boss.health -= 3;
+                                            boss.health -= 5;
                                             if (boss.health <= 0) {
                                                 boss.die();
                                                 levelOn = 1;
