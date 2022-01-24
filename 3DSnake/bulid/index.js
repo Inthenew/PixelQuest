@@ -8,11 +8,13 @@ var onmouseoverGreenStaff;
 var onmouseleaveGreenStaff;
 var equipSword;
 var zombies;
+window.__ = undefined;
+const isNull = value => typeof value === "object" && !value;
 require([
     'dojo/dom',
     'dojo/fx',
     'dojo/domReady!'
-], function (dom, fx) {
+], function(dom, fx) {
     $("#textBox").hide();
     $("#gold").hide();
     $("#redStaffStats").hide();
@@ -30,6 +32,7 @@ require([
     var been = false;
     /* when click to continue gets clicked */
     var dot = 'https://inthenew.github.io/PixelQuest/3DSnake//bulid/models'
+    let canMove = true;
 
     function game() {
         if (not(been)) {
@@ -47,12 +50,13 @@ require([
 
                 var quest = {
                     one: {
-                        images: {map: '<img id="questone" src="' + dot + '/New Piskel (49).gif">'}
+                        images: { map: '<img id="questone" src="' + dot + '/New Piskel (49).gif">' }
                     },
                     two: {
                         images: {
-                            map: '<img id="map3" src=`${dot}/pixil-frame-0.png`>',
-                            boss: '<img id="boss1" src="' + dot + '/sprite_0 copy.png">'
+                            map: '<img id="map3" src="https://inthenew.github.io/PixelQuest/3DSnake/bulid/models/pixil-frame-0.png">',
+                            boss: '<img id="boss1" src="' + dot + '/sprite_0 copy.png">',
+                            bullet: `<img class="bossBullet" src="${dot}/New Piskel (1).gif">`
                         }
                     }
                 }
@@ -93,9 +97,10 @@ require([
 
                     KeyDown(e, house, width, height) {
                         if (this.alive) {
-                            if (!inPrompt) {
+                            if (!inPrompt && canMove) {
                                 switch (e.keyCode) {
-                                    case 87: /*w*/
+                                    case 87:
+                                        /*w*/
                                         this.face = "up";
                                         this.updateImage('<img id="img" src="' + dot + '/0-1.gif">', this.y, false, 30, false);
                                         if (this.checkCollision(house, width, height)) {
@@ -105,9 +110,14 @@ require([
                                                 top: this.y,
                                                 left: this.x
                                             }).play();
+                                            canMove = false;
+                                            setTimeout(() => {
+                                                canMove = true;
+                                            }, 30)
                                         }
                                         break;
-                                    case 83: /*s*/
+                                    case 83:
+                                        /*s*/
                                         this.face = "down";
                                         this.updateImage('<img id="img" src="' + dot + '/0-3.gif">', this.y, true, 30, false);
                                         if (this.checkCollision(house, width, height)) {
@@ -117,9 +127,14 @@ require([
                                                 top: this.y,
                                                 left: this.x
                                             }).play();
+                                            canMove = false;
+                                            setTimeout(() => {
+                                                canMove = true;
+                                            }, 30)
                                         }
                                         break;
-                                    case 68: /*d*/
+                                    case 68:
+                                        /*d*/
                                         this.face = "right";
                                         this.updateImage('<img id="img" src="' + dot + '/0-2.gif">', this.x, true, 30, true);
                                         if (this.checkCollision(house, width, height)) {
@@ -129,9 +144,14 @@ require([
                                                 top: this.y,
                                                 left: this.x
                                             }).play();
+                                            canMove = false;
+                                            setTimeout(() => {
+                                                canMove = true;
+                                            }, 30)
                                         }
                                         break;
-                                    case 65: /*a*/
+                                    case 65:
+                                        /*a*/
                                         this.face = "left";
                                         var img = document.getElementById("img").getBoundingClientRect();
                                         this.updateImage('<img id="img" src="' + dot + '/0.gif">', this.x, false, 30, true);
@@ -142,6 +162,10 @@ require([
                                                 top: this.y,
                                                 left: this.x
                                             }).play();
+                                            canMove = false;
+                                            setTimeout(() => {
+                                                canMove = true;
+                                            }, 30)
                                         }
                                         break;
                                 }
@@ -150,8 +174,7 @@ require([
                     }
 
                     Animate() {
-                        if (this.alive) {
-                        }
+                        if (this.alive) {}
                     }
 
                     updateImage(to, e, b, p, c) {
@@ -200,7 +223,7 @@ require([
                                     difference = house.x - this.x;
                                 }
                                 var AABB = {
-                                    collide: function (player, el2, offset) {
+                                    collide: function(player, el2, offset) {
                                         var rect1 = player;
                                         var rect2 = el2.getBoundingClientRect();
 
@@ -317,6 +340,7 @@ require([
                                         }
                                         /*enterd second quest!*/
                                         boss.drawing.show();
+                                        level2map.l.show();
                                         fx.slideTo({
                                             node: document.getElementById('img'),
                                             left: window.innerWidth - 70,
@@ -327,7 +351,7 @@ require([
                                         questOn = 2;
                                     }
                                     var AABB = {
-                                        collide: function (player, el2, offset) {
+                                        collide: function(player, el2, offset) {
                                             var rect1 = player;
                                             var rect2 = el2.getBoundingClientRect();
 
@@ -352,6 +376,7 @@ require([
                                     } else if (this.x < 0) {
                                         /*Left the quest!*/
                                         boss.drawing.hide();
+                                        level2map.l.hide();
                                         mapOn = "quest";
                                         questOn = 1;
                                         map.l.hide();
@@ -368,7 +393,7 @@ require([
                                         return true;
                                     }
                                     var AABB = {
-                                        collide: function (player, el2, offset) {
+                                        collide: function(player, el2, offset) {
                                             var rect1 = player;
                                             var rect2 = el2.getBoundingClientRect();
 
@@ -441,7 +466,7 @@ require([
                             return true;
                         }
                         var AABB = {
-                            collide: function (player, el2, offset) {
+                            collide: function(player, el2, offset) {
                                 var rect1 = player.getBoundingClientRect();
                                 var rect2 = el2.getBoundingClientRect();
 
@@ -454,7 +479,7 @@ require([
                             }
                         };
                         var AABB2 = {
-                            collide: function (player, el2, offset) {
+                            collide: function(player, el2, offset) {
                                 var rect1 = player;
                                 var rect2 = el2.getBoundingClientRect();
 
@@ -567,7 +592,20 @@ require([
                     text = String(text);
                     $("#text").text(text)
                 }
-
+                class Level2Map {
+                    constructor() {
+                        this.html = quest.two.images.map;
+                        this.l = $(this.html);
+                        this.l.css({
+                            position: "absolute",
+                            width: window.innerWidth,
+                            height: window.innerHeight
+                        });
+                        $("body").append(this.l);
+                    }
+                }
+                let level2map = new Level2Map();
+                level2map.l.hide();
                 //
                 //
                 //
@@ -575,17 +613,114 @@ require([
                     constructor(x, y) {
                         this.x = x;
                         this.y = y;
+                        this.bulletSpeed = 50;
+                        this.alive = true;
+                        this.health = 10;
+                        this.bullets = [];
                     }
-
+                    die() {
+                        this.alive = false;
+                        this.drawing23.remove();
+                    }
                     draw() {
                         this.html = quest.two.images.boss;
-                        this.drawing = $(this.html);
-                        this.drawing.css({
+                        this.drawing23 = $(this.html);
+                        this.drawing = this.drawing23;
+                        let x = this.x;
+                        let y = this.y;
+                        this.drawing23.css({
                             position: "absolute",
-                            left: this.x,
-                            top: this.y
+                            left: x,
+                            top: y
                         })
-                        $("body").append(this.drawing);
+                        $("body").append(this.drawing23);
+                    }
+                    AABB(player, el2, offset) {
+                        var rect1 = player.get(0).getBoundingClientRect();
+                        var rect2 = el2.getBoundingClientRect();
+                        return !(
+                            rect1.top > rect2.bottom - offset ||
+                            rect1.right < rect2.left + offset ||
+                            rect1.bottom < rect2.top + offset ||
+                            rect1.left > rect2.right - offset
+                        );
+                    }
+                    checkCollision(x, y, bullet) {
+                        // // TODO: !Check collision with walls, not sign! //
+                        if (this.AABB(bullet, document.getElementById('img'), 20)) {
+                            player.health -= 3;
+                            if (player.health <= 0) {
+                                player.die();
+                            }
+                            return true;
+                        }
+                        if (x > screen.availWidth - 50 || y < 0 || x < 0 || y > screen.availHeight - 80) {
+                            return true;
+                        }
+                    }
+                    destroyBullet(bullet) {
+                        bullet.remove();
+                    }
+                    drawBullet(dir) {
+                        if (mapOn === 'quest') {
+                            if (questOn === 2) {
+                                this.html = quest.two.images.bullet;
+                                this.drawing = $(this.html);
+                                let x = this.x + 60;
+                                let y = this.y + 60;
+                                this.drawing.css({
+                                    position: "absolute",
+                                    left: x,
+                                    top: y
+                                })
+                                let drawing = this.drawing;
+                                $("body").append(this.drawing);
+                                let p = setInterval(() => {
+                                    if (player.alive && this.alive) {
+                                        if (dir === 'left') {
+                                            x -= this.bulletSpeed;
+                                        } else if (dir === 'right') {
+                                            x += this.bulletSpeed;
+                                        } else if (dir === 'up') {
+                                            y -= this.bulletSpeed;
+                                        } else if (dir === 'down') {
+                                            y += this.bulletSpeed;
+                                        } else {
+                                            throw new Error(`Class Boss: Bullet Dir is not any of wanted proporties; it is: ${bullet.dir}`);
+                                        }
+                                        if (this.checkCollision(x, y, drawing)) {
+                                            this.destroyBullet(drawing);
+                                            clearInterval(p);
+                                        }
+                                        drawing.css({
+                                            position: "absolute",
+                                            left: x,
+                                            top: y
+                                        })
+                                    } else {
+                                        this.destroyBullet(drawing);
+                                        clearInterval(p);
+                                    }
+                                }, 200)
+                            }
+                        }
+                    }
+                    async shoot() {
+                        if (this.alive) {
+                            await this.drawBullet('left');
+                            await this.drawBullet('right');
+                            await this.drawBullet('up');
+                            await this.drawBullet('down');
+                        }
+                    }
+                    update() {
+                        if (this.alive) {
+                            this.drawing23.css({
+                                position: "absolute",
+                                left: this.x,
+                                top: this.y
+                            })
+                        }
                     }
                 }
 
@@ -626,7 +761,7 @@ require([
                     }
                 }
 
-                document.onmousedown = function (e) {
+                document.onmousedown = function(e) {
                     e.preventDefault();
                 }
 
@@ -886,7 +1021,7 @@ require([
                             }
                             //
                             var AABB = {
-                                collide: function (player, el2, offset) {
+                                collide: function(player, el2, offset) {
                                     var rect1 = player.getBoundingClientRect();
                                     var rect2 = el2.getBoundingClientRect();
 
@@ -935,7 +1070,7 @@ require([
                                 return true;
                             }
                             var AABB = {
-                                collide: function (player, el2, offset) {
+                                collide: function(player, el2, offset) {
                                     var rect1 = player.getBoundingClientRect();
                                     var rect2 = el2.getBoundingClientRect();
 
@@ -947,14 +1082,28 @@ require([
                                     );
                                 }
                             };
-                            for (var i = 0; i < zombies.length; i++) {
-                                if (zombies[i].alive) {
-                                    if (AABB.collide(document.getElementById("RedStaffB"), document.getElementById(`Zombie${i}`), 0)) {
-                                        zombies[i].health -= 2;
-                                        if (zombies[i].health <= 0) {
-                                            zombies[i].die();
-                                            gold++;
-                                            $(".gold").text(String(gold))
+                            if (questOn === 1) {
+                                for (var i = 0; i < zombies.length; i++) {
+                                    if (zombies[i].alive) {
+                                        if (AABB.collide(document.getElementById("RedStaffB"), document.getElementById(`Zombie${i}`), 0)) {
+                                            zombies[i].health -= 2;
+                                            if (zombies[i].health <= 0) {
+                                                zombies[i].die();
+                                                gold++;
+                                                $(".gold").text(String(gold))
+                                            }
+                                            return true;
+                                        }
+                                    }
+                                }
+                            } else if (questOn === 2) {
+                                if (boss.alive) {
+                                    if (AABB.collide(document.getElementById("RedStaffB"), document.getElementById(`boss1`), 0)) {
+                                        boss.health -= 2;
+                                        if (boss.health <= 0) {
+                                            boss.die();
+                                            gold += 7;
+                                            $(".gold").text(String(gold));
                                         }
                                         return true;
                                     }
@@ -1122,7 +1271,7 @@ require([
                             }
                             //
                             var AABB = {
-                                collide: function (player, el2, offset) {
+                                collide: function(player, el2, offset) {
                                     var rect1 = player.getBoundingClientRect();
                                     var rect2 = el2.getBoundingClientRect();
 
@@ -1171,7 +1320,7 @@ require([
                                 return true;
                             }
                             var AABB = {
-                                collide: function (player, el2, offset) {
+                                collide: function(player, el2, offset) {
                                     var rect1 = player.getBoundingClientRect();
                                     var rect2 = el2.getBoundingClientRect();
 
@@ -1215,7 +1364,7 @@ require([
 
                 var greenstaff = new GreenStaff(300, 100);
                 var greenstaffB = new GreenStaffB(300, 100);
-                Greenstaff = function () {
+                Greenstaff = function() {
                     $(".gold").text(gold);
                     if (greenstaffBEEN) {
                         equip(greenstaff);
@@ -1315,7 +1464,7 @@ require([
                             });
                             if (this.justHit) {
                                 var AABB = {
-                                    collide: function (player, el2, offset) {
+                                    collide: function(player, el2, offset) {
                                         var rect1 = player.getBoundingClientRect();
                                         var rect2 = el2.getBoundingClientRect();
 
@@ -1346,7 +1495,7 @@ require([
                     }
                 }
 
-                equipSword = function () {
+                equipSword = function() {
                     if (not(sword.Used)) {
                         equip(sword);
                     }
@@ -1480,84 +1629,84 @@ require([
                     $("#redStaffStats").hide();
                 }
                 $(".gold").text(gold);
-                document.onclick = function (e) {
-                    if (!inPrompt) {
-                        if (redstaff.Used) {
-                            redstaffB.justShot = true;
-                            var t = setTimeout(function () {
-                                redstaffB.justShot = false;
-                                redstaffB.distaceShot = 0;
-                                redstaffB.movedShot = false;
-                                $(".RedStaffB").hide();
-                            }, 1000)
-                            var int = setInterval(function () {
-                                if (redstaffB.checkCollision(house, 400, 400)) {
-                                    clearInterval(int);
-                                    clearTimeout(t);
+                document.onclick = function(e) {
+                        if (!inPrompt) {
+                            if (redstaff.Used) {
+                                redstaffB.justShot = true;
+                                var t = setTimeout(function() {
                                     redstaffB.justShot = false;
                                     redstaffB.distaceShot = 0;
                                     redstaffB.movedShot = false;
                                     $(".RedStaffB").hide();
-                                }
-                            })
-                        } else if (greenstaff.Used) {
-                            greenstaffB.justShot = true;
-                            var t = setTimeout(function () {
-                                greenstaffB.justShot = false;
-                                greenstaffB.distaceShot = 0;
-                                greenstaffB.movedShot = false;
-                                $(".GreenStaffB").hide();
-                            }, 1000)
-                            var int = setInterval(function () {
-                                if (greenstaffB.checkCollision(house, 400, 400)) {
-                                    clearInterval(int);
-                                    clearTimeout(t);
+                                }, 1000)
+                                var int = setInterval(function() {
+                                    if (redstaffB.checkCollision(house, 400, 400)) {
+                                        clearInterval(int);
+                                        clearTimeout(t);
+                                        redstaffB.justShot = false;
+                                        redstaffB.distaceShot = 0;
+                                        redstaffB.movedShot = false;
+                                        $(".RedStaffB").hide();
+                                    }
+                                })
+                            } else if (greenstaff.Used) {
+                                greenstaffB.justShot = true;
+                                var t = setTimeout(function() {
                                     greenstaffB.justShot = false;
                                     greenstaffB.distaceShot = 0;
                                     greenstaffB.movedShot = false;
                                     $(".GreenStaffB").hide();
+                                }, 1000)
+                                var int = setInterval(function() {
+                                    if (greenstaffB.checkCollision(house, 400, 400)) {
+                                        clearInterval(int);
+                                        clearTimeout(t);
+                                        greenstaffB.justShot = false;
+                                        greenstaffB.distaceShot = 0;
+                                        greenstaffB.movedShot = false;
+                                        $(".GreenStaffB").hide();
+                                    }
+                                })
+                            } else if (sword.Used) {
+                                if (not(sword.justHit)) {
+                                    if (sword.face === "right") {
+                                        sword.drawing.css({
+                                            position: "absolute",
+                                            left: sword.x,
+                                            top: sword.y,
+                                            width: sword.width,
+                                            height: sword.height,
+                                            transform: 'rotate(45deg)'
+                                        })
+                                    } else if (sword.face === "left") {
+                                        sword.drawing.css({
+                                            position: "absolute",
+                                            left: sword.x,
+                                            top: sword.y,
+                                            width: sword.width,
+                                            height: sword.height,
+                                            transform: 'rotate(-45deg)'
+                                        })
+                                    }
+                                    sword.justHit = true;
+                                    setTimeout(function() {
+                                        sword.justHit = false;
+                                        sword.drawing.css({
+                                            position: "absolute",
+                                            left: sword.x,
+                                            top: sword.y,
+                                            width: sword.width,
+                                            height: sword.height,
+                                            transform: 'rotate(0deg)'
+                                        })
+                                    }, 200)
                                 }
-                            })
-                        } else if (sword.Used) {
-                            if (not(sword.justHit)) {
-                                if (sword.face === "right") {
-                                    sword.drawing.css({
-                                        position: "absolute",
-                                        left: sword.x,
-                                        top: sword.y,
-                                        width: sword.width,
-                                        height: sword.height,
-                                        transform: 'rotate(45deg)'
-                                    })
-                                } else if (sword.face === "left") {
-                                    sword.drawing.css({
-                                        position: "absolute",
-                                        left: sword.x,
-                                        top: sword.y,
-                                        width: sword.width,
-                                        height: sword.height,
-                                        transform: 'rotate(-45deg)'
-                                    })
-                                }
-                                sword.justHit = true;
-                                setTimeout(function () {
-                                    sword.justHit = false;
-                                    sword.drawing.css({
-                                        position: "absolute",
-                                        left: sword.x,
-                                        top: sword.y,
-                                        width: sword.width,
-                                        height: sword.height,
-                                        transform: 'rotate(0deg)'
-                                    })
-                                }, 200)
                             }
                         }
                     }
-                }
-                //
-                //
-                /* This is When you Buy it! */
+                    //
+                    //
+                    /* This is When you Buy it! */
                 Redstaff = () => {
                     $(".gold").text(gold);
                     if (redstaffBEEN) {
@@ -1585,7 +1734,7 @@ require([
                         }
                     }
                 }
-                ok = function () {
+                ok = function() {
                     if (text_on === "You need: " + Math.abs(gold - redstaff.price) + " more gold!") {
                         hide_Prompt();
                         text_on = "Hello Adventurers!";
@@ -1713,10 +1862,11 @@ require([
                     zombies[i].draw();
                 }
                 $(".Zombies").hide();
-                var boss = new Boss(window.innerWidth / 2, window.innerHeight / 2);
+                var boss = new Boss(window.innerWidth / 2 - 60, window.innerHeight / 2 - 60);
+                window.boss = boss;
                 boss.draw();
                 boss.drawing.hide();
-                setInterval(function () {
+                setInterval(function() {
                     if (player.alive) {
                         for (var i = 0; i < zombies.length; i++) {
                             if (zombies[i].alive) {
@@ -1725,6 +1875,11 @@ require([
                         }
                     }
                 }, zombies[0].Timout)
+                setInterval(function() {
+                    if (player.alive) {
+                        boss.shoot();
+                    }
+                }, 2000)
                 var lastH = 0;
 
                 function updatePlayerHealth() {
@@ -1738,11 +1893,10 @@ require([
                     }
                 }
 
-                setInterval(function () {
+                setInterval(function() {
                     if (player.alive) {
-                        if (player.health !== 10) {
+                        if (player.health <= 8) {
                             player.health += 2;
-
                         }
                     }
                 }, 10000)
@@ -1754,6 +1908,7 @@ require([
                         height2 = window.innerHeight;
                         player.Animate();
                         redstaff.update();
+                        boss.update();
                         redstaffB.update();
                         greenstaff.update();
                         greenstaffB.update();
@@ -1767,7 +1922,7 @@ require([
 
 
                 animate();
-                $("body").keydown(function (e) {
+                $("body").keydown(function(e) {
                     player.KeyDown(e, house, 400, 400);
                 })
             } else {
@@ -1778,45 +1933,22 @@ require([
 
 
     var pickedCancel = false;
-    document.addEventListener('mousedown', function () {
-            if (BigScreen.enabled) {
-                var instructions = this
-                BigScreen.request(document.body /*renderer.domElement*/, function () {
-                    $("body").css({
-                        margin: 0,
-                        overflowY: 'hidden',
-                        /* Hide vertical scrollbar */
-                        overflowX: 'hidden',
-                        /* Hide horizontal scrollbar */
-                        height: '100%',
-                        backgroundColor: 'rgb(255, 255, 255)'
-                    })
-                    $("#gold").show();
-                    game();
-                }, function () {
-                }, function () {
-                    if (not(pickedCancel)) {
-                        $("body").css({
-                            margin: 0,
-                            overflowY: 'hidden',
-                            /* Hide vertical scrollbar */
-                            overflowX: 'hidden',
-                            /* Hide horizontal scrollbar */
-                            height: '100%',
-                            backgroundColor: 'rgb(255, 255, 255)'
-                        })
-                        $("#gold").show();
-                        if (not(been) && confirm('Full screen failed: No FullScreen? (ok: yes; cancel: try again)') && not(pickedCancel)) {
-                            pickedCancel = true;
-                            game();
-                        } else {
-
-                        }
-                    }
-                });
-
-            } else {
-                // We fall back to alternative controls
+    document.addEventListener('mousedown', function() {
+        if (BigScreen.enabled) {
+            var instructions = this
+            BigScreen.request(document.body /*renderer.domElement*/ , function() {
+                $("body").css({
+                    margin: 0,
+                    overflowY: 'hidden',
+                    /* Hide vertical scrollbar */
+                    overflowX: 'hidden',
+                    /* Hide horizontal scrollbar */
+                    height: '100%',
+                    backgroundColor: 'rgb(255, 255, 255)'
+                })
+                $("#gold").show();
+                game();
+            }, function() {}, function() {
                 if (not(pickedCancel)) {
                     $("body").css({
                         margin: 0,
@@ -1835,8 +1967,31 @@ require([
 
                     }
                 }
+            });
+
+        } else {
+            // We fall back to alternative controls
+            if (not(pickedCancel)) {
+                $("body").css({
+                    margin: 0,
+                    overflowY: 'hidden',
+                    /* Hide vertical scrollbar */
+                    overflowX: 'hidden',
+                    /* Hide horizontal scrollbar */
+                    height: '100%',
+                    backgroundColor: 'rgb(255, 255, 255)'
+                })
+                $("#gold").show();
+                if (not(been) && confirm('Full screen failed: No FullScreen? (ok: yes; cancel: try again)') && not(pickedCancel)) {
+                    pickedCancel = true;
+                    game();
+                } else {
+
+                }
             }
         }
-    )
+    })
 });
+// Make second level
+// Make second level
 // Make second level
