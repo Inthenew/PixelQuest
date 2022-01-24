@@ -1699,7 +1699,7 @@ require([
                 var wall4 = new WallTurned(window.innerWidth - 100, 0);
                 var redstaff = new RedStaff(160, 100);
                 var redstaffB = new RedStaffBULLET(160, 100);
-                var gold = 100;
+                var gold = 0;
                 document.getElementById("price").innerHTML = "Price: " + String(redstaff.price);
                 onmouseoverRedStaff = () => {
                     if (not(redstaffBEEN)) {
